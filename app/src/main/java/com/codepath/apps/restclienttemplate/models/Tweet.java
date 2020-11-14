@@ -3,27 +3,57 @@ package com.codepath.apps.restclienttemplate.models;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.parceler.Parcel;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
+@Parcel
+@Entity(foreignKeys = @ForeignKey(entity =  User.class, parentColumns = "id",  childColumns = "userId"))
 public class Tweet {
 
-    public String body;
-    public String CreatedAt;
-    public User user;
+    @PrimaryKey
+    @ColumnInfo
     public long id;
+
+    @ColumnInfo
+    public String body;
+
+    @ColumnInfo
+    public String CreatedAt;
+
+    @ColumnInfo
+    public String userId;
+
+
+    @Ignore
+    public User user;
+
+
+
     //private Entities entities;
+    @ColumnInfo
     public String mediaUrl;
-    public String video;
-    public int bitrate;
+
+
+
+    // empty constructor needed by the Parceler library
+    public Tweet() {
+    }
 
     public static Tweet fromjson(JSONObject jsonObject) throws JSONException {
         Tweet tweet = new Tweet();
         tweet.body = jsonObject.getString("text");
-        tweet.CreatedAt = jsonObject.getString("created_at");
+        tweet.CreatedAt = getFormattedTimeStamp(jsonObject.getString("created_at"));
         tweet.id = jsonObject.getLong("id");
-        tweet.user = User.fromJson(jsonObject.getJSONObject("user"));
+        User user = User.fromJson(jsonObject.getJSONObject("user"));
+        tweet.user = user;
 
         JSONObject entities = jsonObject.getJSONObject("entities");
         if (entities != null && entities.has("media")) {
@@ -72,7 +102,7 @@ public class Tweet {
         return tweets;
     }
 
-    public String getFormattedTimeStamp(String CreatedAt) {
+    public static String getFormattedTimeStamp(String CreatedAt) {
 
         return TimeFormatter.getTimeDifference(CreatedAt);
 
